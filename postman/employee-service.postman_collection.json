@@ -4,9 +4,18 @@
     "description": "REST API for managing employees (Babel/Invex technical test).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "auth": {
+    "type": "basic",
+    "basic": [
+      { "key": "username", "value": "{{apiUsername}}" },
+      { "key": "password", "value": "{{apiPassword}}" }
+    ]
+  },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:8080" },
-    { "key": "employeeId", "value": "1" }
+    { "key": "employeeId", "value": "1" },
+    { "key": "apiUsername", "value": "admin" },
+    { "key": "apiPassword", "value": "admin" }
   ],
   "item": [
     {
@@ -181,9 +190,21 @@
     {
       "name": "Health Check",
       "request": {
+        "auth": { "type": "noauth" },
         "method": "GET",
         "header": [],
-        "url": { "raw": "{{baseUrl}}/actuator/health", "host": ["{{baseUrl}}"], "path": ["actuator", "health"] }
+        "url": { "raw": "{{baseUrl}}/actuator/health", "host": ["{{baseUrl}}"], "path": ["actuator", "health"] },
+        "description": "No credentials needed — permitted by SecurityConfig alongside Swagger/OpenAPI docs."
+      }
+    },
+    {
+      "name": "Get All Employees - Unauthorized (401)",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/v1/employees", "host": ["{{baseUrl}}"], "path": ["v1", "employees"] },
+        "description": "Deliberately sends no credentials to demonstrate every /v1/employees/** endpoint requires HTTP Basic auth."
       }
     }
   ]

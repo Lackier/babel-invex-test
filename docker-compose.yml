@@ -28,6 +28,8 @@ services:
       DB_NAME: employeedb
       DB_USERNAME: employee
       DB_PASSWORD: employee
+      SECURITY_USERNAME: admin
+      SECURITY_PASSWORD: admin
     ports:
       - "8080:8080"
     healthcheck:

@@ -10,6 +10,7 @@ REST microservice for managing employees (Babel/Invex technical test).
 - springdoc-openapi (Swagger UI)
 - JUnit 5 + Mockito + AssertJ + MockMvc
 - Docker / Docker Compose
+- Spring Security (HTTP Basic)
 
 ## Prerequisites
 
@@ -38,13 +39,14 @@ Start just the database (`docker compose up -d mysql`), then `mvn spring-boot:ru
 
 The app starts on `http://localhost:8080`.
 
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-- Health check: `http://localhost:8080/actuator/health`
+- Swagger UI: `http://localhost:8080/swagger-ui.html` (open, no auth)
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs` (open, no auth)
+- Health check: `http://localhost:8080/actuator/health` (open, no auth)
+- All `/v1/employees/**` endpoints require HTTP Basic auth — default `admin`/`admin`, overridable via `SECURITY_USERNAME`/`SECURITY_PASSWORD` env vars (e.g. `curl -u admin:admin http://localhost:8080/v1/employees`)
 
 ## Postman collection
 
-Import `postman/employee-service.postman_collection.json` into Postman. It covers all 6 endpoints plus error cases (404, 400) and the health check, using a `baseUrl` collection variable (defaults to `http://localhost:8080`).
+Import `postman/employee-service.postman_collection.json` into Postman. It covers all 6 endpoints plus error cases (404, 400, 401, 413) and the health check, using `baseUrl`/`apiUsername`/`apiPassword` collection variables (defaults: `http://localhost:8080`, `admin`/`admin`) applied via collection-level Basic Auth.
 
 ## Tests
 
@@ -54,8 +56,9 @@ mvn test
 
 Includes:
 - `EmployeeServiceImplTest` (Mockito) — business rules: batch creation, partial update, search, error cases.
-- `EmployeeControllerTest` (`@WebMvcTest` + MockMvc) — HTTP status codes, payload validation.
+- `EmployeeControllerTest` (`@WebMvcTest` + MockMvc, security filters disabled) — HTTP status codes, payload validation.
 - `EmployeeRepositoryTest` (`@DataJpaTest`) — partial name search, automatic timestamp.
+- `SecurityIntegrationTest` (`@SpringBootTest`, real embedded server + `TestRestTemplate`) — 401 without credentials, 401 with wrong credentials, 200 with correct ones, Swagger/health stay open.
 - `EmployeeServiceApplicationTests` — context load.
 
 ## "Employee" model
@@ -117,7 +120,7 @@ curl "http://localhost:8080/v1/employees/search?name=mar&page=1&size=10"
 
 ```
 src/main/java/com/babel/employeeservice/
-  config/            OpenAPI, Jackson (JsonNullableModule), request logging, body size limit filter, GlobalExceptionHandler
+  config/            OpenAPI, Jackson (JsonNullableModule), Spring Security, request logging, body size limit filter, GlobalExceptionHandler
   constants/         validation/format constants
   controller/        EmployeeController (REST)
   dto/request/       EmployeeRequest, EmployeeUpdateRequest
