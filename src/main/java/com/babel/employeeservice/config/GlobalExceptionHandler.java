@@ -21,7 +21,9 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -30,66 +32,69 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(EmployeeNotFoundException.class)
     public ResponseEntity<ApiError> handleNotFound(EmployeeNotFoundException ex, WebRequest request) {
-        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null, request);
+        return buildResponse(NOT_FOUND, ex.getMessage(), null, request);
     }
 
     @ExceptionHandler(InvalidEmployeeDataException.class)
     public ResponseEntity<ApiError> handleInvalidData(InvalidEmployeeDataException ex, WebRequest request) {
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), null, request);
+        return buildResponse(BAD_REQUEST, ex.getMessage(), null, request);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiError> handleConstraintViolation(ConstraintViolationException ex, WebRequest request) {
         List<String> details = ex.getConstraintViolations().stream()
                 .map(this::formatViolation)
-                .collect(Collectors.toList());
-        return buildResponse(HttpStatus.BAD_REQUEST, "Validation failed", details, request);
+                .collect(toList());
+
+        return buildResponse(BAD_REQUEST, "Validation failed", details, request);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException ex, WebRequest request) {
         String message = String.format("Parameter '%s' has invalid value: %s", ex.getName(), ex.getValue());
-        return buildResponse(HttpStatus.BAD_REQUEST, message, null, request);
+        return buildResponse(BAD_REQUEST, message, null, request);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneric(Exception ex, WebRequest request) {
         log.error("Unhandled exception", ex);
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", null, request);
+        return buildResponse(INTERNAL_SERVER_ERROR, "An unexpected error occurred", null, request);
     }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-                                                                    HttpHeaders headers,
-                                                                    HttpStatus status,
-                                                                    WebRequest request) {
+                                                                  HttpHeaders headers,
+                                                                  HttpStatus status,
+                                                                  WebRequest request) {
         List<String> details = ex.getBindingResult().getFieldErrors().stream()
                 .map(this::formatFieldError)
-                .collect(Collectors.toList());
+                .collect(toList());
         ApiError error = ApiError.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .status(BAD_REQUEST.value())
+                .error(BAD_REQUEST.getReasonPhrase())
                 .message("Validation failed")
                 .path(path(request))
                 .details(details)
                 .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+
+        return ResponseEntity.status(BAD_REQUEST).body(error);
     }
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
-                                                                    HttpHeaders headers,
-                                                                    HttpStatus status,
-                                                                    WebRequest request) {
+                                                                  HttpHeaders headers,
+                                                                  HttpStatus status,
+                                                                  WebRequest request) {
         ApiError error = ApiError.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .status(BAD_REQUEST.value())
+                .error(BAD_REQUEST.getReasonPhrase())
                 .message("Malformed JSON request body")
                 .path(path(request))
                 .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+
+        return ResponseEntity.status(BAD_REQUEST).body(error);
     }
 
     private String formatFieldError(FieldError fieldError) {
@@ -100,8 +105,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return violation.getPropertyPath() + ": " + violation.getMessage();
     }
 
-    private ResponseEntity<ApiError> buildResponse(HttpStatus status, String message, List<String> details,
-                                                     WebRequest request) {
+    private ResponseEntity<ApiError> buildResponse(HttpStatus status, String message, List<String> details, WebRequest request) {
         ApiError error = ApiError.builder()
                 .timestamp(LocalDateTime.now())
                 .status(status.value())
@@ -110,6 +114,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .path(path(request))
                 .details(details)
                 .build();
+
         return ResponseEntity.status(status).body(error);
     }
 

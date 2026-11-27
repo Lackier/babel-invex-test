@@ -8,10 +8,10 @@ public final class AgeBirthDateConsistency {
     private AgeBirthDateConsistency() {
     }
 
-    public static boolean isConsistent(Integer age, LocalDate birthDate) {
+    public static boolean isNotConsistent(Integer age, LocalDate birthDate) {
         if (age == null || birthDate == null) {
-            return true;
+            return false;
         }
-        return age == Period.between(birthDate, LocalDate.now()).getYears();
+        return age != Period.between(birthDate, LocalDate.now()).getYears();
     }
 }

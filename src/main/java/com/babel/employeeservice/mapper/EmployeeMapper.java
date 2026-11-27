@@ -1,8 +1,8 @@
 package com.babel.employeeservice.mapper;
 
 import com.babel.employeeservice.dto.request.EmployeeRequest;
-import com.babel.employeeservice.dto.response.EmployeeResponse;
 import com.babel.employeeservice.dto.request.EmployeeUpdateRequest;
+import com.babel.employeeservice.dto.response.EmployeeResponse;
 import com.babel.employeeservice.entity.Employee;
 import com.babel.employeeservice.entity.Sex;
 import org.springframework.data.domain.Page;
@@ -75,7 +75,9 @@ public class EmployeeMapper {
     }
 
     public List<EmployeeResponse> toResponseList(List<Employee> employees) {
-        return employees.stream().map(this::toResponse).collect(Collectors.toList());
+        return employees.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     public Page<EmployeeResponse> toResponsePage(Page<Employee> employees) {

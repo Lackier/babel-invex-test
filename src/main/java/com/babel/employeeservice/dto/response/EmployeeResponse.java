@@ -1,17 +1,14 @@
 package com.babel.employeeservice.dto.response;
 
-import com.babel.employeeservice.constants.EmployeeConstants;
 import com.babel.employeeservice.entity.Sex;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import static com.babel.employeeservice.constants.EmployeeConstants.BIRTH_DATE_PATTERN;
 
 @Getter
 @Setter
@@ -29,8 +26,8 @@ public class EmployeeResponse {
     private Integer age;
     private Sex sex;
 
-    @JsonFormat(pattern = EmployeeConstants.BIRTH_DATE_PATTERN)
-    @Schema(pattern = EmployeeConstants.BIRTH_DATE_PATTERN, type = "string")
+    @JsonFormat(pattern = BIRTH_DATE_PATTERN)
+    @Schema(pattern = BIRTH_DATE_PATTERN, type = "string")
     private LocalDate birthDate;
 
     private String position;

@@ -1,20 +1,17 @@
 package com.babel.employeeservice.dto.request;
 
-import com.babel.employeeservice.constants.EmployeeConstants;
 import com.babel.employeeservice.entity.Sex;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.openapitools.jackson.nullable.JsonNullable;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
+
+import static com.babel.employeeservice.constants.EmployeeConstants.*;
 
 /**
  * Every field is optional: only non-null fields are applied to the stored employee,
@@ -42,15 +39,15 @@ public class EmployeeUpdateRequest {
     @Schema(type = "string", description = "Omit to leave unchanged, send null to clear it")
     private JsonNullable<String> maternalLastName = JsonNullable.undefined();
 
-    @Min(value = EmployeeConstants.MIN_AGE, message = EmployeeConstants.AGE_RANGE)
-    @Max(value = EmployeeConstants.MAX_AGE, message = EmployeeConstants.AGE_RANGE)
+    @Min(value = MIN_AGE, message = AGE_RANGE)
+    @Max(value = MAX_AGE, message = AGE_RANGE)
     private Integer age;
 
     private Sex sex;
 
-    @Past(message = EmployeeConstants.BIRTH_DATE_PAST)
-    @JsonFormat(pattern = EmployeeConstants.BIRTH_DATE_PATTERN)
-    @Schema(pattern = EmployeeConstants.BIRTH_DATE_PATTERN, type = "string")
+    @Past(message = BIRTH_DATE_PAST)
+    @JsonFormat(pattern = BIRTH_DATE_PATTERN)
+    @Schema(pattern = BIRTH_DATE_PATTERN, type = "string")
     private LocalDate birthDate;
 
     private String position;
