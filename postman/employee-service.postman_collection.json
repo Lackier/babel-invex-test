@@ -1,0 +1,190 @@
+{
+  "info": {
+    "name": "Employee Service",
+    "description": "REST API for managing employees (Babel/Invex technical test).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "employeeId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Get All Employees (paginated)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/employees?page=0&size=20",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "employees"],
+          "query": [
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "20" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Employees - Invalid Pagination (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/employees?page=-1010&size=1000000",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "employees"],
+          "query": [
+            { "key": "page", "value": "-1010" },
+            { "key": "size", "value": "1000000" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Employee By Id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/employees/{{employeeId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "employees", "{{employeeId}}"]
+        }
+      }
+    },
+    {
+      "name": "Get Employee By Id - Not Found",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/employees/999999",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "employees", "999999"]
+        }
+      }
+    },
+    {
+      "name": "Create Employees (batch)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "[\n  {\n    \"firstName\": \"Maria\",\n    \"middleName\": \"Elena\",\n    \"paternalLastName\": \"Gonzalez\",\n    \"maternalLastName\": \"Lopez\",\n    \"age\": 32,\n    \"sex\": \"FEMALE\",\n    \"birthDate\": \"10-01-1994\",\n    \"position\": \"Developer\"\n  },\n  {\n    \"firstName\": \"Juan\",\n    \"paternalLastName\": \"Martinez\",\n    \"maternalLastName\": \"Ramirez\",\n    \"age\": 42,\n    \"sex\": \"MALE\",\n    \"birthDate\": \"20-03-1984\",\n    \"position\": \"Manager\"\n  }\n]"
+        },
+        "url": { "raw": "{{baseUrl}}/v1/employees", "host": ["{{baseUrl}}"], "path": ["v1", "employees"] }
+      }
+    },
+    {
+      "name": "Create Employees - Validation Error",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "[\n  {\n    \"age\": 30\n  }\n]"
+        },
+        "url": { "raw": "{{baseUrl}}/v1/employees", "host": ["{{baseUrl}}"], "path": ["v1", "employees"] }
+      }
+    },
+    {
+      "name": "Create Employees - Body Too Large (413)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const item = {firstName:'A',paternalLastName:'B',age:30,sex:'MALE',birthDate:'05-05-1996',position:'QA'};",
+              "const itemStr = JSON.stringify(item);",
+              "const itemsNeeded = Math.ceil(1200000 / (itemStr.length + 1));",
+              "const bigArray = new Array(itemsNeeded).fill(item);",
+              "pm.request.body.raw = JSON.stringify(bigArray);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "[]"
+        },
+        "url": { "raw": "{{baseUrl}}/v1/employees", "host": ["{{baseUrl}}"], "path": ["v1", "employees"] },
+        "description": "The pre-request script generates a >1MB JSON array at send-time (replacing this placeholder body), so this request triggers 413 as-is without manual edits."
+      }
+    },
+    {
+      "name": "Update Employee (partial)",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"position\": \"Senior Developer\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/employees/{{employeeId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "employees", "{{employeeId}}"]
+        }
+      }
+    },
+    {
+      "name": "Update Employee - Clear middleName (explicit null)",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"middleName\": null\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/employees/{{employeeId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "employees", "{{employeeId}}"]
+        }
+      }
+    },
+    {
+      "name": "Delete Employee",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/employees/{{employeeId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "employees", "{{employeeId}}"]
+        }
+      }
+    },
+    {
+      "name": "Search Employees by Name (paginated)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/v1/employees/search?name=mar&page=0&size=20",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "employees", "search"],
+          "query": [
+            { "key": "name", "value": "mar" },
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "20" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/actuator/health", "host": ["{{baseUrl}}"], "path": ["actuator", "health"] }
+      }
+    }
+  ]
+}
